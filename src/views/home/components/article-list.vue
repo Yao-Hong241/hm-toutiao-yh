@@ -2,9 +2,11 @@
   <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
   <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
   <div class="scroll-wrapper">
-    <van-list v-model="upLoading" :finished="finished" finished-text="没有了" @load="onLoad">
-      <van-cell v-for="article in articles" :key="article" :title="article"></van-cell>
-    </van-list>
+    <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
+      <van-list v-model="upLoading" :finished="finished" finished-text="没有了" @load="onLoad">
+        <van-cell v-for="article in articles" :key="article" :title="article"></van-cell>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 
@@ -13,12 +15,15 @@ export default {
   name: 'article-list',
   data () {
     return {
+      downLoading: false, // 是否开启下拉刷新
       upLoading: false, // 是否加载数据
       finished: false, // 加载是否完成
-      articles: [] // 定义一个数组
+      articles: [], // 定义一个数组
+      refreshSuccessText: '更新成功'
     }
   },
   methods: {
+    // 下拉加载
     onLoad () {
       // 加载方法
       setTimeout(() => {
@@ -33,6 +38,17 @@ export default {
           this.articles.push(...arr) // 把生成的数据追加到末尾
           this.upLoading = false // 关闭状态
         }
+      }, 1000)
+    },
+    // 上拉刷新
+    onRefresh () {
+      // 触发下拉刷新
+      console.log('下拉刷新')
+      setTimeout(() => {
+        let arr = Array.from(Array(10), (value, index) => '追加' + (index + 1))
+        this.articles.unshift(...arr) // 将数据添加到队首
+        this.downLoading = false // 关掉下拉状态
+        this.refreshSuccessText = `更新了${arr.length}条数据`
       }, 1000)
     }
   }
