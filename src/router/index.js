@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 const Layout = () => import('@/views/layout') // 布局组件
 const Home = () => import('@/views/home') // 主页组件
 const Question = () => import('@/views/question') // 问答组件
-const Video = () => import('@/views/video') // 视频组件
+const Videos = () => import('@/views/videos') // 视频组件
 const User = () => import('@/views/user') // 个人中心
 const Profile = () => import('@/views/user/profile') // 编辑资料
 const Chat = () => import('@/views/user/chat') // 小智同学
@@ -27,8 +27,8 @@ const routes = [
       component: Question // 二级路由 问答组件
     },
     {
-      path: '/video',
-      component: Video // 二级路由 视频组件
+      path: '/videos',
+      component: Videos // 二级路由 视频组件
     }, {
       path: '/user',
       component: User // 二级路由 个人中心
