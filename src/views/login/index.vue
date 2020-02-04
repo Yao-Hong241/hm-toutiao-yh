@@ -4,29 +4,26 @@
     <!-- 手机号  验证码  登录按钮 -->
     <van-cell-group>
       <van-field
-        @blur="checkMobile"
         :error-message="errMsg.mobile"
-        v-model.trim="loginForm.mobile"
+        @blur="checkMobile"
+        v-model="loginForm.mobile"
         label="手机号"
         placeholder="请输入手机号"
-      />
-      <van-field
-        @blur="checkCode"
-        :error-message="errMsg.code"
-        v-model.trim="loginForm.code"
-        label="验证码"
-        placeholder="请输入验证码"
-      >
+      ></van-field>
+      <van-field @blur="checkCode" :error-message="errMsg.code" v-model="loginForm.code" label="验证码" placeholder="请输入验证码">
+        <!-- slot指定给哪个坑填内容 -->
         <van-button slot="button" size="small" type="primary">发送验证码</van-button>
       </van-field>
     </van-cell-group>
-    <div class="btn_box">
-      <van-button size="small" type="info" @click="login" block round>登 录</van-button>
+    <div class="btn-box">
+      <van-button @click="login" type="info" size="small" round block>登录</van-button>
     </div>
   </div>
 </template>
 
 <script>
+import { login } from '@/api/user'
+import { mapMutations } from 'vuex'
 export default {
   name: 'login',
   data () {
@@ -70,19 +67,30 @@ export default {
       return true
     },
     // 登录方法
-    login () {
+    async login () {
       if (this.checkMobile() && this.checkCode()) {
         // 都通过了 表示前端校验通过 还要调用接口
         // 提示消息 表示登录成功
-        console.log('校验通过')
+        const data = await login(this.loginForm) // 获取结果
+        // 拿到了token 更新token信息
+        // this.$store.commit('updateUser', { user: data }) // 第一种写法
+
+        this.updateUser({ user: data }) // 更新用户信息
+        // 登录成功
+        this.$gnotify({ type: 'success', message: '登录成功' })
+        // 跳转
+        // 两种情况 1 redirectUrl (登录未遂 => 登录  => 遂) 2 没有 redirectUrl 跳到首页
+        let { redirectUrl } = this.$route.query // 解构当前的路由信息
+        this.$router.push(redirectUrl || '/') // 短路表达式
       }
-    }
+    },
+    ...mapMutations(['updateUser']) // 将vuex中的mutations方法映射到方法中
   }
 }
 </script>
 
 <style scoped>
-.btn_box {
+.btn-box {
   padding: 20px;
 }
 </style>

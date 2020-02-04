@@ -1,30 +1,39 @@
+// 封装request模块
+// 为什么要封装 ? 因为 要在拦截器里处理  token统一注入, 响应数据的统一处理返回 处理大数字
+// token失效
 import axios from 'axios' // 引入axios插件
 import JSONBig from 'json-bigint' // 处理大数字插件
 import store from '@/store' // 引入vuex中的store实例
-import router from '@/router'
+import router from '@/router' // 引入路由对象实例
+// 创建一个新的 插件实例
+// 应该给request请求 一个默认的请求头  baseURL
 const instance = axios.create({
-  // 构造参数
-  baseURL: 'http://ttapi.research.itcast.cn/app/v1_0', // 设置请求地址常量
+  baseURL: 'http://ttapi.research.itcast.cn/app/v1_0', // 设置一个常量的基础地址
   transformResponse: [function (data) {
-    //   data就是后端响应的字符串 默认的转化是 JSON.parse 处理大数字是有问题的额 需要用JSONBIG替换
+    //  当后台 响应的字符串 回到axios请求时 就会触发
+    //  data是一个字符串  把字符串转化成 对象并且返回 默认的是JSON.parse()
+    // 如果data是一个空字符串  直接转化就会报错
     // return data ? JSONBig.parse(data) : {}
     try {
       return JSONBig.parse(data)
     } catch (error) {
-      return data
+      return data // 如果失败 就把字符串直接返回
     }
-  }]
-})
-// 请求拦截器
+  }] // 处理后台返回的数据  字符串 => 对象  JSON.parse() => JSONBig.parse()  =>转化大数字类型
+}) // 创建一个axios的请求 工具
+// 拦截器
+// 请求拦截器 => 发起请求 => 请求拦截器  => 服务器  => 统一注入token
+// 响应拦截器 => 服务器  =>  响应拦截器   => then  await
 instance.interceptors.request.use(function (config) {
-  // config就是请求的参数
+// 应该在返回配置之前  往配置里塞入token
   if (store.state.user.token) {
-    //   统一注入token
-    config.headers['Authorization'] = `Bearer ${store.state.user.token}`
+    //   如果token存在 就要注入
+    config.headers['Authorization'] = `Bearer ${store.state.user.token}` // 统一注入token
   }
+  // 配置信息
+  return config
 }, function (error) {
-  // 返回失败
-  return Promise.reject(error)
+  return Promise.reject(error) // 直接返回promise错误
 })
 // 响应拦截器
 instance.interceptors.response.use(function (response) {
@@ -78,4 +87,4 @@ instance.interceptors.response.use(function (response) {
   }
   return Promise.reject(error)
 })
-export default instance
+export default instance // 导出request工具
