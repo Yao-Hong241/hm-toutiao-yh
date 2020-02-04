@@ -41,7 +41,15 @@ export default {
       upLoading: false, // 是否加载数据
       finished: false, // 加载是否完成
       articles: [], // 定义一个数组
-      refreshSuccessText: '更新成功'
+      refreshSuccessText: '更新成功',
+      timestamp: null // 定义一个时间戳
+    }
+  },
+  props: {
+    channel_id: {
+      required: true,
+      type: Number,
+      default: null
     }
   },
   methods: {
