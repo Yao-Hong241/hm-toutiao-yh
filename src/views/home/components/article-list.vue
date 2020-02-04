@@ -56,6 +56,7 @@ export default {
   methods: {
     // 上拉加载
     async  onLoad () {
+      await this.$sleep()
       // // 加载方法
       // setTimeout(() => {
       //   if (this.articles.length === 50) {
@@ -84,6 +85,7 @@ export default {
     },
     // 下拉刷新方法
     async onRefresh () {
+      await this.$sleep()
       // 触发下拉刷新
       // console.log('下拉刷新')
       // setTimeout(() => {
