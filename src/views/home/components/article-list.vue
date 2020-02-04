@@ -21,7 +21,7 @@
               <span>{{ article.aut_name }}</span>
               <span>{{ article.comm_count }}评论</span>
               <span>{{ article.pubdate | relTime }}</span>
-              <span class="close">
+              <span class="close" v-if="user.token" @click="$emit('showAction',article.art_id.toString())">
                 <van-icon name="cross"></van-icon>
               </span>
             </div>
@@ -34,6 +34,7 @@
 
 <script>
 import { getArticles } from '@/api/article'
+import { mapState } from 'vuex'
 export default {
   name: 'article-list',
   data () {
@@ -45,6 +46,9 @@ export default {
       refreshSuccessText: '更新成功',
       timestamp: null // 定义一个时间戳
     }
+  },
+  computed: {
+    ...mapState(['user'])
   },
   props: {
     channel_id: {
