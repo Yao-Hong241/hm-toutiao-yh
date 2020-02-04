@@ -21,7 +21,11 @@
               <span>{{ article.aut_name }}</span>
               <span>{{ article.comm_count }}评论</span>
               <span>{{ article.pubdate | relTime }}</span>
-              <span class="close" v-if="user.token" @click="$emit('showAction',article.art_id.toString())">
+              <span
+                class="close"
+                v-if="user.token"
+                @click="$emit('showAction',article.art_id.toString())"
+              >
                 <van-icon name="cross"></van-icon>
               </span>
             </div>
@@ -35,6 +39,7 @@
 <script>
 import { getArticles } from '@/api/article'
 import { mapState } from 'vuex'
+import eventBus from '@/utils/eventBus'
 export default {
   name: 'article-list',
   data () {
@@ -57,9 +62,24 @@ export default {
       default: null
     }
   },
+  created () {
+    // 开启监听
+    eventBus.$on('delArticle', (articleId, channelId) => {
+      if (this.channel_id === channelId) {
+        // 这个条件表示 该列表就是当前激活的列表
+        let index = this.articles.findIndex(
+          item => item.art_id.toString() === articleId
+        ) // 查找对应的文章
+        // 如果index大于 -1 表示找到了 就要删除
+        if (index > -1) {
+          this.articles.splice(index, 1) // 删除不喜欢的文章
+        }
+      }
+    })
+  },
   methods: {
     // 上拉加载
-    async  onLoad () {
+    async onLoad () {
       await this.$sleep()
       // // 加载方法
       // setTimeout(() => {
@@ -75,7 +95,10 @@ export default {
       //     this.upLoading = false // 关闭状态
       //   }
       // }, 1000)
-      let data = await getArticles({ channel_id: this.channel_id, timestamp: this.timestamp || Date.now() })
+      let data = await getArticles({
+        channel_id: this.channel_id,
+        timestamp: this.timestamp || Date.now()
+      })
       // 追加数据到队尾
       this.articles.push(...data.results)
       // 关闭加载状态
@@ -99,7 +122,10 @@ export default {
       //   this.refreshSuccessText = `更新了${arr.length}条数据`
       // }, 1000)
       // 下拉刷新永远拉取的是最新的数据
-      const data = await getArticles({ channel_id: this.channel_id, timestamp: Date.now() })
+      const data = await getArticles({
+        channel_id: this.channel_id,
+        timestamp: Date.now()
+      })
       this.downLoading = false // 关掉下拉状态
       // 有可能 最新没有推荐数据
       if (data.results.length) {
@@ -112,7 +138,7 @@ export default {
         this.timestamp = data.pre_timestamp // 赋值历史时间戳 因为当你下拉刷新之后 上拉加载的时候 要用到这个历史事件戳
         this.refreshSuccessText = `更新了${data.results.length}条数据`
       } else {
-      //  如果没有数据更新  什么都不需要变化
+        //  如果没有数据更新  什么都不需要变化
         this.refreshSuccessText = '已是最新数据'
       }
     }
