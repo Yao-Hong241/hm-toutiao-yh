@@ -1,8 +1,9 @@
 <template>
-   <div class="container">
+  <div class="container">
     <van-tabs v-model="activeIndex" swipeable>
-      <van-tab :title="'标签' +  item" v-for="item in 10" :key="item">
-        <ArticleList></ArticleList>
+      <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
+        <!-- 因为一个tab标签 对应一个article-list组件 -->
+        <article-list></article-list>
       </van-tab>
     </van-tabs>
     <span class="bar_btn">
@@ -13,15 +14,26 @@
 
 <script>
 import ArticleList from './components/article-list'
+import { getMyChannels } from '@/api/channels'
 export default {
   name: 'home', // devtools查看组件时  可以看到 对应的name名称
   data () {
     return {
-      activeIndex: 0 // 默认启动第0 个标签
+      activeIndex: 0, // 默认启动第0 个标签
+      channels: [] // 频道需要的数据
     }
   },
   components: {
     ArticleList // 注册组件
+  },
+  methods: {
+    async getMyChannels () {
+      let data = await getMyChannels()
+      this.channels = data.channels // 更新原来的channels
+    }
+  },
+  created () {
+    this.getMyChannels()
   }
 }
 </script>
@@ -42,13 +54,13 @@ export default {
       height: 2px;
     }
   }
-  /deep/ .van-tabs__content{
+  /deep/ .van-tabs__content {
     flex: 1;
     overflow: hidden;
   }
-  /deep/ .van-tab__pane{
+  /deep/ .van-tab__pane {
     height: 100%;
-    .scroll-wrapper{
+    .scroll-wrapper {
       height: 100%;
       overflow-y: auto;
     }
