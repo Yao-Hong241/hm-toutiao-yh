@@ -23,26 +23,37 @@
         </div>
       </div>
     </van-list>
+    <!-- 提交模块 -->
     <div class="reply-container van-hairline--top">
-      <van-field v-model="value" placeholder="写评论...">
+      <van-field v-model.trim="value" placeholder="写评论...">
         <van-loading v-if="submiting" slot="button" type="spinner" size="16px"></van-loading>
-        <span class="submit" v-else slot="button">提交</span>
+        <span class="submit" @click="submit" v-else slot="button">提交</span>
       </van-field>
     </div>
     <!-- 回复列表弹层 -->
-    <van-action-sheet :round="false" v-model="showReply" title="回复评论" class="reply_dialog">
+    <van-action-sheet
+      @closed="reply.commentId=null"
+      :round="false"
+      v-model="showReply"
+      title="回复评论"
+      class="reply_dialog"
+    >
       <!-- 回复列表组件  -->
-       <!-- 关闭第一次主动上拉加载 immediate-check -->
-      <van-list @load="getReply" :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
+      <!-- 关闭第一次主动上拉加载 immediate-check -->
+      <van-list
+        @load="getReply"
+        :immediate-check="false"
+        v-model="reply.loading"
+        :finished="reply.finished"
+        finished-text="没有更多了"
+      >
         <!-- 要循环的数据 -->
-        <div class="item van-hairline--bottom van-hairline--top" v-for="reply in reply.list" :key="reply.com_id.toString()">
-          <van-image
-            round
-            width="1rem"
-            height="1rem"
-            fit="fill"
-            :src="reply.aut_photo"
-          />
+        <div
+          class="item van-hairline--bottom van-hairline--top"
+          v-for="reply in reply.list"
+          :key="reply.com_id.toString()"
+        >
+          <van-image round width="1rem" height="1rem" fit="fill" :src="reply.aut_photo" />
           <div class="info">
             <p>
               <span class="name">{{reply.aut_name}}</span>
@@ -61,7 +72,7 @@
 </template>
 
 <script>
-import { getComments } from '@/api/article' // 引入封装的获取评论方法
+import { getComments, commentOrReply } from '@/api/article' // 引入封装的获取评论方法 回复评论方法
 export default {
   data () {
     return {
@@ -86,6 +97,37 @@ export default {
     }
   },
   methods: {
+    // 提交评论的方法
+    async submit () {
+      if (!this.value) return false // 评论为空 返回
+      this.submiting = true // 控制用户单位时间内评论的数据次数
+      await this.$sleep() // 强制等待500毫秒
+      try {
+        const data = await commentOrReply({
+          content: this.value, // 评论内容
+          target: this.reply.commentId
+            ? this.reply.commentId.toString()
+            : this.$route.query.articleId,
+          art_id: this.reply.commentId ? this.$route.query.articleId : null
+        })
+        // 评论成功  将数据呈现到视图上
+        if (this.reply.commentId) {
+          // 对评论进行评论
+          this.reply.list.unshift(data.new_obj) // 将数据添加到 队首
+          const comment = this.comments.find(item => item.com_id.toString() === this.reply.commentId.toString())
+          comment && comment.reply_count++ // 如果找到了 就对恢复数据加1
+        } else {
+          // 对文章进行评论
+          this.comments.unshift(data.new_obj)
+        }
+        // 提交后清空输入框
+        this.value = ''
+      } catch (error) {
+        this.gnotify({ type: 'danger', message: '评论失败' })
+      }
+      // 最后关闭状态
+      this.submiting = false
+    },
     // 打开回复列表面板
     openReply (commentId) {
       this.showReply = true
