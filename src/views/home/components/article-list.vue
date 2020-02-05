@@ -4,7 +4,7 @@
   <div class="scroll-wrapper">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <van-list v-model="upLoading" :finished="finished" finished-text="没有了" @load="onLoad">
-        <van-cell v-for="article in articles" :key="article.art_id.toString()">
+        <van-cell :to="`/article?articleId=${article.art_id.toString()}`" v-for="article in articles" :key="article.art_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{ article.title }}</h3>
             <!-- 三图 -->
@@ -24,7 +24,7 @@
               <span
                 class="close"
                 v-if="user.token"
-                @click="$emit('showAction',article.art_id.toString())"
+                @click.stop="$emit('showAction',article.art_id.toString())"
               >
                 <van-icon name="cross"></van-icon>
               </span>
