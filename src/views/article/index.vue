@@ -1,27 +1,41 @@
 <template>
- <div class='container'>
+  <div class="container">
     <van-nav-bar fixed :title="article.title" left-arrow @click-left="$router.back()" />
     <div class="detail">
       <h3 class="title">{{ article.title }}</h3>
       <div class="author">
-        <van-image round width="1rem" height="1rem" fit="fill"
-         :src="article.aut_photo" />
+        <van-image round width="1rem" height="1rem" fit="fill" :src="article.aut_photo" />
         <div class="text">
           <p class="name">{{ article.aut_name }}</p>
           <!-- relTime过滤器 将时间转化成相对时间 -->
           <p class="time">{{ article.pubdate | relTime }}</p>
         </div>
         <!-- is_followed 为true表示已关注该用户 false表示未关注 -->
-        <van-button round size="small" type="info">{{ article.is_followed ? '已关注' : '+ 关注' }}</van-button>
+        <van-button
+          @click="follow()"
+          round
+          size="small"
+          type="info"
+        >{{article.is_followed?'已关注':'+ 关注'}}</van-button>
       </div>
       <!-- v-html 可以渲染html标签 -->
-      <div class="content" v-html="article.content">
-      </div>
+      <div class="content" v-html="article.content"></div>
       <div class="zan">
-       <!-- :class="{css名称: 布尔值}" -->
-        <van-button round size="small" :class="{active: article.attitude === 1}" plain icon="like-o">点赞</van-button>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <van-button round size="small" :class="{active: article.attitude === 0}" plain icon="delete">不喜欢</van-button>
+        <!-- :class="{css名称: 布尔值}" -->
+        <van-button
+          round
+          size="small"
+          :class="{active: article.attitude === 1}"
+          plain
+          icon="like-o"
+        >点赞</van-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <van-button
+          round
+          size="small"
+          :class="{active: article.attitude === 0}"
+          plain
+          icon="delete"
+        >不喜欢</van-button>
       </div>
     </div>
   </div>
@@ -29,6 +43,7 @@
 
 <script>
 import { getArticleInfo } from '@/api/article'
+import { followUser, unFollowUser } from '@/api/user'
 export default {
   name: 'articles',
   data () {
@@ -37,6 +52,22 @@ export default {
     }
   },
   methods: {
+    // 关注或者取消关注
+    async follow () {
+      try {
+        if (this.article.is_followed) {
+        // 取消关注接口
+          await unFollowUser(this.article.aut_id)
+        } else {
+        // 关注接口
+          await followUser({ target: this.article.aut_id })
+        }
+        this.article.is_followed = !this.article.is_followed
+        this.$gnotify({ type: 'success', message: '操作成功' })
+      } catch (error) {
+        this.$gnotify({ type: 'danger', message: '操作失败' })
+      }
+    },
     // 获取文章详情
     async getArticleInfo () {
       let { articleId } = this.$route.query // 结构查询id
