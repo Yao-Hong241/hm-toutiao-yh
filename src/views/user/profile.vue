@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 导航 -->
-    <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存"></van-nav-bar>
+    <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存" @click-right="saveUserInfo"></van-nav-bar>
     <van-cell-group>
       <!-- 头像 -->
       <van-cell is-link title="头像" center>
@@ -47,13 +47,13 @@
       />
     </van-popup>
     <!-- 设置一个文件上传控件 -->
-    <input @change="upload" ref="myFile" type="file" name="" style="display:none">
+    <input @change="upload" ref="myFile" type="file" name style="display:none" />
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件
-import { getUserProfile, updateImg } from '@/api/user' // 引入个人资料接口
+import { getUserProfile, updateImg, saveUserInfo } from '@/api/user' // 引入个人资料接口
 export default {
   name: 'profile',
   data () {
@@ -119,6 +119,15 @@ export default {
       let result = await updateImg(data)
       this.user.photo = result.photo
       this.showPhoto = false // 关闭弹层
+    },
+    // 保存用户信息
+    async saveUserInfo () {
+      try {
+        await saveUserInfo({ ...this.user, photo: null })
+        this.$gnotify({ type: 'success', message: '保存成功' })
+      } catch (error) {
+        this.$gnotify({ type: 'danger', message: '保存失败' })
+      }
     }
   },
   created () {

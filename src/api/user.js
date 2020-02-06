@@ -46,3 +46,13 @@ export function updateImg (data) {
     data
   })
 }
+/***
+ * 保存个人信息
+ * **/
+export function saveUserInfo (data) {
+  return request({
+    url: '/user/profile',
+    method: 'patch',
+    data
+  })
+}
