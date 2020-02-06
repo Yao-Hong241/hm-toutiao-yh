@@ -23,7 +23,7 @@
     <!-- 头像弹层组件 -->
     <van-popup v-model="showPhoto" style="width:80%">
       <!-- 1.本地相册选择图片 -->
-      <van-cell is-link title="本地相册选择图片"></van-cell>
+      <van-cell @click="openChangeFile" is-link title="本地相册选择图片"></van-cell>
       <!-- 2.拍照 -->
       <van-cell is-link title="拍照"></van-cell>
     </van-popup>
@@ -46,12 +46,14 @@
         :max-date="maxDate"
       />
     </van-popup>
+    <!-- 设置一个文件上传控件 -->
+    <input @change="upload" ref="myFile" type="file" name="" style="display:none">
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件
-import { getUserProfile } from '@/api/user' // 引入个人资料接口
+import { getUserProfile, updateImg } from '@/api/user' // 引入个人资料接口
 export default {
   name: 'profile',
   data () {
@@ -104,6 +106,19 @@ export default {
       let data = await getUserProfile()
       // 将数据赋值给user
       this.user = data
+    },
+    // 点击选择图片触发 文件上传
+    openChangeFile () {
+      this.$refs.myFile.click() // 触发文件上传组件的方法
+    },
+    // 当选择图片之后触发方法
+    async upload () {
+      // this.$refs.myFile.files[0]
+      let data = new FormData()
+      data.append('photo', this.$refs.myFile.files[0])
+      let result = await updateImg(data)
+      this.user.photo = result.photo
+      this.showPhoto = false // 关闭弹层
     }
   },
   created () {

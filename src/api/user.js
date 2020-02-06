@@ -36,3 +36,13 @@ export function getUserProfile () {
     url: '/user/profile'
   })
 }
+/**
+ * 上传用户头像
+ * **/
+export function updateImg (data) {
+  return request({
+    url: '/user/photo',
+    method: 'patch',
+    data
+  })
+}
