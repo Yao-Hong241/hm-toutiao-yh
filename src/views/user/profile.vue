@@ -113,7 +113,6 @@ export default {
     },
     // 当选择图片之后触发方法
     async upload () {
-      // this.$refs.myFile.files[0]
       let data = new FormData()
       data.append('photo', this.$refs.myFile.files[0])
       let result = await updateImg(data)
