@@ -1,7 +1,7 @@
 <template>
   <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
   <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-  <div class="scroll-wrapper">
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remember">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
       <van-list v-model="upLoading" :finished="finished" finished-text="没有了" @load="onLoad">
         <van-cell :to="`/article?articleId=${article.art_id.toString()}`" v-for="article in articles" :key="article.art_id.toString()">
@@ -49,7 +49,8 @@ export default {
       finished: false, // 加载是否完成
       articles: [], // 定义一个数组
       refreshSuccessText: '更新成功',
-      timestamp: null // 定义一个时间戳
+      timestamp: null, // 定义一个时间戳
+      scrollTop: 0 // 滚动条距离顶部的高度
     }
   },
   computed: {
@@ -63,7 +64,7 @@ export default {
     }
   },
   created () {
-    // 开启监听
+    // 开启监听 删除文章事件
     eventBus.$on('delArticle', (articleId, channelId) => {
       if (this.channel_id === channelId) {
         // 这个条件表示 该列表就是当前激活的列表
@@ -76,8 +77,26 @@ export default {
         }
       }
     })
+    eventBus.$on('changeTab', id => {
+      // 判断一下id是否等于当前id
+      if (id === this.channel_id) {
+        // this.$nextTick 会在数据响应式之后 页面渲染完毕之后执行
+        this.$nextTick(() => {
+          // 判断是否存在滚动条
+          if (this.scrollTop && this.$refs.myScroll) {
+            this.$refs.myScroll.scrollTop = this.scrollTop
+          }
+        })
+      }
+    })
   },
   methods: {
+    // 记录位置的方法
+    // 当绑定事件只写 方法名时  第一个参数就是event 事件对象参数
+    remember (event) {
+      // 记录滚动条距离顶部的高度
+      this.scrollTop = event.target.scrollTop
+    },
     // 上拉加载
     async onLoad () {
       await this.$sleep()
@@ -141,6 +160,12 @@ export default {
         //  如果没有数据更新  什么都不需要变化
         this.refreshSuccessText = '已是最新数据'
       }
+    }
+  },
+  // 激活函数，当组件被keep-alive包裹 组件下的组件有同样的效果
+  activated () {
+    if (this.scrollTop && this.$refs.myScroll) {
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将记录的位置赋值给dom元素
     }
   }
 }

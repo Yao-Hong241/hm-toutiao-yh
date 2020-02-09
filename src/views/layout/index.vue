@@ -3,7 +3,14 @@
     <van-nav-bar @click-right="$router.push('/search')" v-if="showNavBar" fixed title="黑马头条" right-text="搜索"></van-nav-bar>
     <!-- 二级路由容器 -->
     <div class="my-wrapper" :class="{ noTop: !showNavBar }">
-      <router-view></router-view>
+      <!-- 如果想要缓存耳机路由组件的话，可以直接缓存二级路由容器
+        如果缓存了二级路由容器，表示  这个容器下的所有组件都会被缓存
+      -->
+      <!-- 使用keep-alive缓存 -->
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
+
     </div>
     <van-tabbar route>
       <!-- router-link  to  -->

@@ -1,6 +1,7 @@
 <template>
   <div class="container">
-    <van-tabs v-model="activeIndex" swipeable>
+    <!-- 监听组件切换  @change -->
+    <van-tabs v-model="activeIndex" swipeable @change="changeTab">
       <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
         <!-- 因为一个tab标签 对应一个article-list组件 -->
         <ArticleList @showAction="openMoreAction" :channel_id="channel.id"></ArticleList>
@@ -54,6 +55,11 @@ export default {
     ChannelEdit
   },
   methods: {
+    // 切换tab页
+    changeTab () {
+      // 触发一个公共事件 事件名字：changeTab  携带参数：
+      eventBus.$emit('changeTab', this.channels[this.activeIndex].id)
+    },
     // 添加频道
     async addChannel (channel) {
       await addChannel(channel)
