@@ -75,9 +75,9 @@ export default {
       }
     })
     this.socket.on('connect', () => {
-      console.log('建立连接成功')
+      // console.log('建立连接成功')
       // 先让小智同学跟用户说一句话(模拟说话)
-      this.list.push({ msg: '秃头小王子，你好！跟我唠唠呗', name: 'xz' })
+      this.list.push({ msg: '亲，有什么需要帮助的？', name: 'xz' })
     })
     // 需要监听小智同学的回复消息
     this.socket.on('message', data => {
