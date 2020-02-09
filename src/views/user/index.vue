@@ -59,10 +59,11 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['clearUser']), // 映射vuex中的mutations方法
+    ...mapMutations(['clearUser', 'updatePhoto']), // 映射vuex中的mutations方法
     // 获取用户个人信息
     async getUserInfo () {
       this.userInfo = await getUserInfo() // 将数据赋值给当前的userInfo
+      this.updatePhoto({ photo: this.userInfo.photo })
     },
     // 登出方法
     async lgout () {

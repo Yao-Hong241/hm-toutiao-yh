@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex' // 引入辅助函数
 import dayjs from 'dayjs' // 引入dayjs插件
 import { getUserProfile, updateImg, saveUserInfo } from '@/api/user' // 引入个人资料接口
 export default {
@@ -75,6 +76,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updatePhoto']), // 映射vuex中的mutations方法
     // 绑定按钮点击事件
     btnName () {
       if (this.user.name.length < 1 || this.user.name.length > 7) {
@@ -104,6 +106,7 @@ export default {
     // 获取用户资料的方法
     async getUserProfile () {
       let data = await getUserProfile()
+      this.updatePhoto({ photo: data.photo })
       // 将数据赋值给user
       this.user = data
     },
@@ -118,6 +121,8 @@ export default {
       let result = await updateImg(data)
       this.user.photo = result.photo
       this.showPhoto = false // 关闭弹层
+      // 当头像上传成功之后 把图片传给 公共数据state
+      this.updatePhoto({ photo: result.photo })
     },
     // 保存用户信息
     async saveUserInfo () {
