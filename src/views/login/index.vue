@@ -29,8 +29,8 @@ export default {
   data () {
     return {
       loginForm: {
-        mobile: '13911111111',
-        code: '246810'
+        mobile: '',
+        code: ''
       },
       // 专门提示信息的
       errMsg: {
